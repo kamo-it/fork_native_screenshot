@@ -256,138 +256,14 @@ public class NativeScreenshotPlugin implements MethodCallHandler, FlutterPlugin,
 	} // reloadMedia()
 
 	private void takeScreenshot() {
-		Log.println(Log.INFO, TAG, "Trying to take screenshot [new way]");
-
-		if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-			this.ssPath = null;
-			this.ssError = true;
-
-			return;
-		}
-
-		try {
-			Window window = this.activity.getWindow();
-			View view = this.activity.getWindow().getDecorView().getRootView();
-
-			Bitmap bitmap = Bitmap.createBitmap(
-					view.getWidth(),
-					view.getHeight(),
-					Bitmap.Config.ARGB_8888
-			); // Bitmap()
-
-			Canvas canvas = new Canvas(bitmap);
-			view.draw(canvas);
-
-//			int[] windowLocation = new int[2];
-//			view.getLocationInWindow(windowLocation);
-//
-//			PixelListener listener = new PixelListener();
-//
-//			PixelCopy.request(
-//					window,
-//              new Rect(
-//                      windowLocation[0],
-//                      windowLocation[1],
-//                      windowLocation[0] + view.getWidth(),
-//                      windowLocation[1] + view.getHeight()
-//              ),
-//					bitmap,
-//					listener,
-//					new Handler()
-//			); // PixelCopy.request()
-//
-//			if( listener.hasError() ) {
-//				this.ssError = true;
-//				this.ssPath = null;
-//
-//				return;
-//			} // if error
-
-			String path = writeBitmap(bitmap);
-			if( path == null || path.isEmpty() ) {
-				this.ssPath = null;
-				this.ssError = true;
-			} // if no path
-
-			this.ssError = false;
-			this.ssPath = path;
-
-			reloadMedia();
-		} catch (Exception ex) {
-			Log.println(Log.INFO, TAG, "Error taking screenshot: " + ex.getMessage());
-		}
+		
 	} // takeScreenshot()
 
 	private void takeScreenshotOld() {
-		Log.println(Log.INFO, TAG, "Trying to take screenshot [old way]");
-
-		try {
-			View view = this.activity.getWindow().getDecorView().getRootView();
-
-			view.setDrawingCacheEnabled(true);
-
-			Bitmap bitmap = null;
-			if (this.renderer.getClass() == FlutterView.class) {
-				bitmap = ((FlutterView) this.renderer).getBitmap();
-			} else if(this.renderer.getClass() == FlutterRenderer.class ) {
-				bitmap = ( (FlutterRenderer) this.renderer ).getBitmap();
-			}
-
-			if(bitmap == null) {
-				this.ssError = true;
-				this.ssPath = null;
-
-				Log.println(Log.INFO, TAG, "The bitmap cannot be created :(");
-
-				return;
-			} // if
-
-			view.setDrawingCacheEnabled(false);
-
-			String path = writeBitmap(bitmap);
-			if( path == null || path.isEmpty() ) {
-				this.ssError = true;
-				this.ssPath = null;
-
-				Log.println(Log.INFO, TAG, "The bitmap cannot be written, invalid path.");
-
-				return;
-			} // if
-
-			this.ssError = false;
-			this.ssPath = path;
-
-			reloadMedia();
-		} catch (Exception ex) {
-			Log.println(Log.INFO, TAG, "Error taking screenshot: " + ex.getMessage());
-		}
+		
 	} // takeScreenshot()
 
 	private boolean permissionToWrite() {
-		if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-			Log.println(Log.INFO, TAG, "Permission to write false due to version codes.");
-
-			return false;
-		}
-
-		int perm = this.activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-		if(perm == PackageManager.PERMISSION_GRANTED) {
-			Log.println(Log.INFO, TAG, "Permission to write granted!");
-
-			return true;
-		} // if
-
-		Log.println(Log.INFO, TAG, "Requesting permissions...");
-		this.activity.requestPermissions(
-			new String[]{
-				Manifest.permission.WRITE_EXTERNAL_STORAGE
-			},
-			11
-		); // requestPermissions()
-
-		Log.println(Log.INFO, TAG, "No permissions :(");
-
 		return false;
 	} // permissionToWrite()
 } // NativeScreenshotPlugin
